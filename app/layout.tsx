@@ -15,14 +15,17 @@ export const metadata: Metadata = {
   generator: "veradium",
   icons: {
     icon: [
+
      
     ],
     apple: "/apple-icon.png",
   },
 }
-
+{}
 export default function RootLayout({
   children,
+
+
 }: Readonly<{
   children: React.ReactNode
 }>) {
