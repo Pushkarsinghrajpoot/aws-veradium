@@ -88,7 +88,18 @@ export default function RBACManagementPage() {
   const { toast } = useToast()
 
   useEffect(() => {
-    fetchData()
+    let cancelled = false
+    
+    const loadData = async () => {
+      if (cancelled) return
+      await fetchData()
+    }
+    
+    loadData()
+    
+    return () => {
+      cancelled = true
+    }
   }, [])
 
   const fetchData = async () => {
@@ -98,7 +109,11 @@ export default function RBACManagementPage() {
         awsRBACService.listRoles(),
         awsRBACService.listRoutes()
       ])
-      setRoles(rolesData)
+      // Deduplicate roles by roleId
+      const uniqueRoles = rolesData.filter((role, index, self) => 
+        index === self.findIndex((r) => r.roleId === role.roleId)
+      )
+      setRoles(uniqueRoles)
       setRoutes(routesData)
     } catch (error) {
       toast({
@@ -451,23 +466,26 @@ export default function RBACManagementPage() {
                             <TableCell className="font-medium">{route.label}</TableCell>
                             <TableCell>
                               <div className="flex flex-wrap gap-1">
-                                {roles.map((role) => (
-                                  <div key={role.roleId} className="flex items-center">
-                                    <Checkbox
-                                      id={`${route.id}-${role.roleId}`}
-                                      checked={route.allowedRoles.includes(role.roleId)}
-                                      onCheckedChange={(checked) =>
-                                        handleUpdateRouteRoles(route.id!, role.roleId, checked as boolean)
-                                      }
-                                      className="mr-1"
-                                    />
-                                    <Label htmlFor={`${route.id}-${role.roleId}`} className="text-xs cursor-pointer">
-                                      <Badge variant="outline" className={role.color}>
-                                        {role.roleId}
-                                      </Badge>
-                                    </Label>
-                                  </div>
-                                ))}
+                                {[...new Set(roles.map(r => r.roleId))].map((roleId) => {
+                                  const role = roles.find(r => r.roleId === roleId)
+                                  if (!role) return null
+                                  return (
+                                    <div key={`${route.id}-${roleId}`} className="flex items-center gap-1">
+                                      <Checkbox
+                                        id={`route-${route.id}-role-${roleId}`}
+                                        checked={route.allowedRoles.includes(roleId)}
+                                        onCheckedChange={(checked) =>
+                                          handleUpdateRouteRoles(route.id!, roleId, checked as boolean)
+                                        }
+                                      />
+                                      <Label htmlFor={`route-${route.id}-role-${roleId}`} className="text-xs cursor-pointer">
+                                        <Badge variant="outline" className={role.color}>
+                                          {roleId}
+                                        </Badge>
+                                      </Label>
+                                    </div>
+                                  )
+                                })}
                               </div>
                             </TableCell>
                             <TableCell>
