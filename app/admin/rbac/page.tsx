@@ -407,33 +407,43 @@ export default function RBACManagementPage() {
                           <div className="space-y-2">
                             <Label>Allowed Roles</Label>
                             <div className="space-y-2 border rounded-md p-3">
-                              {roles.map((role) => (
-                                <div key={role.roleId} className="flex items-center gap-2">
-                                  <Checkbox
-                                    id={`new-${role.roleId}`}
-                                    checked={newRoute.allowedRoles.includes(role.roleId)}
-                                    onCheckedChange={(checked) => {
-                                      if (checked) {
-                                        setNewRoute({
-                                          ...newRoute,
-                                          allowedRoles: [...newRoute.allowedRoles, role.roleId],
-                                        })
-                                      } else {
-                                        setNewRoute({
-                                          ...newRoute,
-                                          allowedRoles: newRoute.allowedRoles.filter((r) => r !== role.roleId),
-                                        })
-                                      }
-                                    }}
-                                  />
-                                  <Label htmlFor={`new-${role.roleId}`} className="cursor-pointer flex items-center gap-2">
-                                    <Badge variant="outline" className={role.color}>
-                                      {role.roleId}
-                                    </Badge>
-                                    {role.isSystem && <Badge variant="secondary" className="text-xs">System</Badge>}
-                                  </Label>
-                                </div>
-                              ))}
+                              {roles.map((role) => {
+                                const isAdmin = role.roleId === 'ADMIN'
+                                const isChecked = isAdmin || newRoute.allowedRoles.includes(role.roleId)
+                                return (
+                                  <div key={role.roleId} className="flex items-center gap-2">
+                                    <Checkbox
+                                      id={`new-${role.roleId}`}
+                                      checked={isChecked}
+                                      disabled={isAdmin}
+                                      onCheckedChange={(checked) => {
+                                        if (isAdmin) return
+                                        if (checked) {
+                                          setNewRoute({
+                                            ...newRoute,
+                                            allowedRoles: [...newRoute.allowedRoles, role.roleId],
+                                          })
+                                        } else {
+                                          setNewRoute({
+                                            ...newRoute,
+                                            allowedRoles: newRoute.allowedRoles.filter((r) => r !== role.roleId),
+                                          })
+                                        }
+                                      }}
+                                    />
+                                    <Label 
+                                      htmlFor={`new-${role.roleId}`} 
+                                      className={`flex items-center gap-2 ${isAdmin ? 'cursor-not-allowed opacity-70' : 'cursor-pointer'}`}
+                                    >
+                                      <Badge variant="outline" className={role.color}>
+                                        {role.roleId}
+                                      </Badge>
+                                      {role.isSystem && <Badge variant="secondary" className="text-xs">System</Badge>}
+                                      {isAdmin && <span className="text-xs text-muted-foreground">(Always has access)</span>}
+                                    </Label>
+                                  </div>
+                                )
+                              })}
                             </div>
                           </div>
                         </div>
@@ -469,16 +479,23 @@ export default function RBACManagementPage() {
                                 {[...new Set(roles.map(r => r.roleId))].map((roleId) => {
                                   const role = roles.find(r => r.roleId === roleId)
                                   if (!role) return null
+                                  const isAdmin = roleId === 'ADMIN'
+                                  const allowedRoles = route.allowedRoles || []
+                                  const isChecked = isAdmin || allowedRoles.includes(roleId)
                                   return (
                                     <div key={`${route.id}-${roleId}`} className="flex items-center gap-1">
                                       <Checkbox
                                         id={`route-${route.id}-role-${roleId}`}
-                                        checked={route.allowedRoles.includes(roleId)}
+                                        checked={isChecked}
+                                        disabled={isAdmin}
                                         onCheckedChange={(checked) =>
-                                          handleUpdateRouteRoles(route.id!, roleId, checked as boolean)
+                                          !isAdmin && handleUpdateRouteRoles(route.id!, roleId, checked as boolean)
                                         }
                                       />
-                                      <Label htmlFor={`route-${route.id}-role-${roleId}`} className="text-xs cursor-pointer">
+                                      <Label 
+                                        htmlFor={`route-${route.id}-role-${roleId}`} 
+                                        className={`text-xs ${isAdmin ? 'cursor-not-allowed opacity-70' : 'cursor-pointer'}`}
+                                      >
                                         <Badge variant="outline" className={role.color}>
                                           {roleId}
                                         </Badge>
@@ -622,7 +639,7 @@ export default function RBACManagementPage() {
                             <p className="text-sm text-muted-foreground">{role.description}</p>
                             <div className="flex items-center gap-2 text-xs text-muted-foreground">
                               <Info className="h-3 w-3" />
-                              <span>{routes.filter(r => r.allowedRoles.includes(role.roleId)).length} routes accessible</span>
+                              <span>{routes.filter(r => (r.allowedRoles || []).includes(role.roleId)).length} routes accessible</span>
                             </div>
                           </div>
                           <div className="flex items-center gap-2">
@@ -684,32 +701,42 @@ export default function RBACManagementPage() {
                 <div className="space-y-2">
                   <Label>Allowed Roles</Label>
                   <div className="space-y-2 border rounded-md p-3">
-                    {roles.map((role) => (
-                      <div key={role.roleId} className="flex items-center gap-2">
-                        <Checkbox
-                          id={`edit-${role.roleId}`}
-                          checked={editRoute.allowedRoles.includes(role.roleId)}
-                          onCheckedChange={(checked) => {
-                            if (checked) {
-                              setEditRoute({
-                                ...editRoute,
-                                allowedRoles: [...editRoute.allowedRoles, role.roleId],
-                              })
-                            } else {
-                              setEditRoute({
-                                ...editRoute,
-                                allowedRoles: editRoute.allowedRoles.filter((r) => r !== role.roleId),
-                              })
-                            }
-                          }}
-                        />
-                        <Label htmlFor={`edit-${role.roleId}`} className="cursor-pointer">
-                          <Badge variant="outline" className={role.color}>
-                            {role.roleId}
-                          </Badge>
-                        </Label>
-                      </div>
-                    ))}
+                    {roles.map((role) => {
+                      const isAdmin = role.roleId === 'ADMIN'
+                      const isChecked = isAdmin || editRoute.allowedRoles.includes(role.roleId)
+                      return (
+                        <div key={role.roleId} className="flex items-center gap-2">
+                          <Checkbox
+                            id={`edit-${role.roleId}`}
+                            checked={isChecked}
+                            disabled={isAdmin}
+                            onCheckedChange={(checked) => {
+                              if (isAdmin) return
+                              if (checked) {
+                                setEditRoute({
+                                  ...editRoute,
+                                  allowedRoles: [...editRoute.allowedRoles, role.roleId],
+                                })
+                              } else {
+                                setEditRoute({
+                                  ...editRoute,
+                                  allowedRoles: editRoute.allowedRoles.filter((r) => r !== role.roleId),
+                                })
+                              }
+                            }}
+                          />
+                          <Label 
+                            htmlFor={`edit-${role.roleId}`} 
+                            className={`flex items-center gap-2 ${isAdmin ? 'cursor-not-allowed opacity-70' : 'cursor-pointer'}`}
+                          >
+                            <Badge variant="outline" className={role.color}>
+                              {role.roleId}
+                            </Badge>
+                            {isAdmin && <span className="text-xs text-muted-foreground">(Always has access)</span>}
+                          </Label>
+                        </div>
+                      )
+                    })}
                   </div>
                 </div>
                 <div className="flex items-center justify-between">
