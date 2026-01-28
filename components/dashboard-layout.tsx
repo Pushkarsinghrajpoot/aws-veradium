@@ -19,6 +19,10 @@ import {
   X,
   Shield,
   Activity,
+  PhoneOff,
+  FileText,
+  Headphones,
+  Home,
 } from "lucide-react"
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
@@ -27,7 +31,11 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 
 const routeIcons: Record<string, React.ElementType> = {
   "/dashboard": LayoutDashboard,
+  "/dashboard/overview": Home,
   "/queues/matrix": Activity,
+  "/agents/performance": Headphones,
+  "/reports/time-analysis": FileText,
+  "/calls/missed": PhoneOff,
   "/metrics/real-time": Clock,
   "/metrics/historical": History,
   "/analytics": TrendingUp,

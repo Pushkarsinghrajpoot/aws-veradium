@@ -103,6 +103,7 @@ export default function QueueMatrixContent() {
 
   // Load queue summary data
   const fetchQueueData = async () => {
+    console.log("🔵 fetchQueueData called")
     setIsLoading(true)
     try {
       const dateRange = {
@@ -110,19 +111,32 @@ export default function QueueMatrixContent() {
         end: DateHelper.formatDateFromDate(endDate, true)
       }
 
+      console.log("📅 Date range:", dateRange)
+      console.log("🌐 Calling API: distribution_distbyqueue")
+
       const result = await athenaAPI.getDistributionByQueue(dateRange.start, dateRange.end)
       
+      console.log("📦 API Result:", {
+        status: result.status,
+        rowCount: result.rowCount,
+        dataLength: result.data?.length,
+        columns: result.columns,
+        sampleData: result.data?.[0]
+      })
+      
       if (result.status === 'SUCCEEDED') {
+        console.log("✅ Setting queue data:", result.data)
         setQueueData(result.data)
         toast({
           title: "Data loaded successfully",
           description: `Showing ${result.rowCount} queue${result.rowCount !== 1 ? 's' : ''}`,
         })
       } else {
+        console.error("❌ Query status not SUCCEEDED:", result.status)
         throw new Error(result.error || 'Query failed')
       }
     } catch (error) {
-      console.error("Queue data fetch error:", error)
+      console.error("❌ Queue data fetch error:", error)
       toast({
         variant: "destructive",
         title: "Failed to load queue data",
@@ -130,6 +144,7 @@ export default function QueueMatrixContent() {
       })
     } finally {
       setIsLoading(false)
+      console.log("🔵 fetchQueueData completed")
     }
   }
 

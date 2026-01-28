@@ -116,6 +116,34 @@ export const DEFAULT_ROUTES: RoutePermission[] = [
     allowedRoles: ["ADMIN", "SUPERVISOR", "ANALYST"],
     isEnabled: true,
   },
+  {
+    id: "11",
+    route: "/dashboard/overview",
+    label: "Dashboard Overview",
+    allowedRoles: ["ADMIN", "SUPERVISOR", "ANALYST"],
+    isEnabled: true,
+  },
+  {
+    id: "12",
+    route: "/agents/performance",
+    label: "Agent Performance",
+    allowedRoles: ["ADMIN", "SUPERVISOR"],
+    isEnabled: true,
+  },
+  {
+    id: "13",
+    route: "/reports/time-analysis",
+    label: "Time Analysis Reports",
+    allowedRoles: ["ADMIN", "SUPERVISOR", "ANALYST"],
+    isEnabled: true,
+  },
+  {
+    id: "14",
+    route: "/calls/missed",
+    label: "Missed Calls",
+    allowedRoles: ["ADMIN", "SUPERVISOR"],
+    isEnabled: true,
+  },
 ]
 
 export const DEFAULT_ADMIN: User = {
